@@ -4,4 +4,4 @@ global:
 scrape_configs:
   - job_name: 'kafka-producer-jmx'
     static_configs:
-      - targets: ['jmx_exporter:5556']
+      - targets: ['kafka-producer:9091']

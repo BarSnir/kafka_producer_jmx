@@ -36,7 +36,13 @@ services:
       - prometheus
     networks:
       - monitoring
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
 
 networks:
   monitoring:
     driver: bridge
+
+volumes:
+  grafana-storage: {}
