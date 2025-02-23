@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  kafka-producer:
+    build:
+      context: .
+      dockerfile: .dockerfile
+    container_name: kafka-producer
+    env_file: ".env"
+    networks:
+      - monitoring
+    ports:
+      - "8080:8080"
+      - "9091:9091"
+
+  prometheus:
+    image: prom/prometheus:v2.35.0
+    attach: false
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+
+  grafana:
+    attach: false
+    image: grafana/grafana:8.5.0
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+
+networks:
+  monitoring:
+    driver: bridge
