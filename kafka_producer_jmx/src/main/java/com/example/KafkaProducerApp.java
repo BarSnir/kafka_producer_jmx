@@ -7,8 +7,8 @@ import java.util.Properties;
 
 public class KafkaProducerApp {
     private static final String BOOTSTRAP_SERVERS = System.getenv("BOOTSTRAP_SERVERS");
-    private static final String API_KEY = System.getenv("API_KEY");
-    private static final String API_SECRET = System.getenv("API_SECRET");
+    private static final String API_KEY = System.getenv("JAVA_API_KEY");
+    private static final String API_SECRET = System.getenv("JAVA_API_SECRET");
     private static final String TOPIC = System.getenv("TOPIC");
 
     public static void main(String[] args) {

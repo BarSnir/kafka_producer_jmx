@@ -18,7 +18,7 @@ services:
     attach: false
     container_name: prometheus
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./ymls/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
     networks:
@@ -38,8 +38,7 @@ services:
       - monitoring
     volumes:
       - grafana-storage:/var/lib/grafana
-
-
+      
 networks:
   monitoring:
     driver: bridge

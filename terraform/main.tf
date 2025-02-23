@@ -43,11 +43,15 @@ resource "confluent_service_account" "tf-demo-manage-topics" {
   description = "Demo for role binding with Terraform, This SA is to manage topic."
 }
 
-resource "confluent_service_account" "tf-demo-read-topic" {
-  display_name = "tf_demo_read_topic"
+resource "confluent_service_account" "tf-java-demo-write-topic" {
+  display_name = "tf_java_demo_write_topic"
   description = "Demo for role binding with Terraform, This SA is to read from single topic."
 }
 
+resource "confluent_service_account" "tf-python-demo-write-topic" {
+  display_name = "tf_python_demo_write_topic"
+  description = "Demo for role binding with Terraform, This SA is to read from single topic."
+}
 #----------------------------------------------------------------
 # Roles binding
 #----------------------------------------------------------------
@@ -64,9 +68,14 @@ resource "confluent_role_binding" "tf-role-binding-developer-manage" {
   crn_pattern = "${confluent_kafka_cluster.bsnir-tf-standard-cluster.rbac_crn}/kafka=${confluent_kafka_cluster.bsnir-tf-standard-cluster.id}/topic=*"
 }
 
-resource "confluent_role_binding" "tf-role-binding-developer-read" {
-  principal   = "User:${confluent_service_account.tf-demo-read-topic.id}"
-  role_name   = "DeveloperRead"
+resource "confluent_role_binding" "tf-java-role-binding-developer-write" {
+  principal   = "User:${confluent_service_account.tf-java-demo-write-topic.id}"
+  role_name   = "DeveloperWrite"
+  crn_pattern = "${confluent_kafka_cluster.bsnir-tf-standard-cluster.rbac_crn}/kafka=${confluent_kafka_cluster.bsnir-tf-standard-cluster.id}/topic=${confluent_kafka_topic.tf-demo-topic.topic_name}"
+}
+resource "confluent_role_binding" "tf-python-role-binding-developer-write" {
+  principal   = "User:${confluent_service_account.tf-python-demo-write-topic.id}"
+  role_name   = "DeveloperWrite"
   crn_pattern = "${confluent_kafka_cluster.bsnir-tf-standard-cluster.rbac_crn}/kafka=${confluent_kafka_cluster.bsnir-tf-standard-cluster.id}/topic=${confluent_kafka_topic.tf-demo-topic.topic_name}"
 }
 
@@ -96,13 +105,35 @@ resource "confluent_api_key" "cluster-manage-topics-api-key" {
   }
 }
 
-resource "confluent_api_key" "cluster-read-topic-api-key" {
+resource "confluent_api_key" "cluster-java-write-topic-api-key" {
   display_name = "cluster_read_topic_api_key"
   description  = "Kafka API Key that is responsible for reading from single topic (see tf-demo-topic resouces)."
   owner {
-    id          = confluent_service_account.tf-demo-read-topic.id
-    api_version = confluent_service_account.tf-demo-read-topic.api_version
-    kind        = confluent_service_account.tf-demo-read-topic.kind
+    id          = confluent_service_account.tf-java-demo-write-topic.id
+    api_version = confluent_service_account.tf-java-demo-write-topic.api_version
+    kind        = confluent_service_account.tf-java-demo-write-topic.kind
+  }
+  managed_resource {
+    id          = confluent_kafka_cluster.bsnir-tf-standard-cluster.id
+    api_version = confluent_kafka_cluster.bsnir-tf-standard-cluster.api_version
+    kind        = confluent_kafka_cluster.bsnir-tf-standard-cluster.kind
+    environment {
+      id = confluent_environment.tf-orchestration-env.id
+    }
+  }
+  # In production - set to true
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+
+resource "confluent_api_key" "cluster-python-write-topic-api-key" {
+  display_name = "cluster_read_topic_api_key"
+  description  = "Kafka API Key that is responsible for reading from single topic (see tf-demo-topic resouces)."
+  owner {
+    id          = confluent_service_account.tf-python-demo-write-topic.id
+    api_version = confluent_service_account.tf-python-demo-write-topic.api_version
+    kind        = confluent_service_account.tf-python-demo-write-topic.kind
   }
   managed_resource {
     id          = confluent_kafka_cluster.bsnir-tf-standard-cluster.id
@@ -126,7 +157,7 @@ resource "confluent_kafka_topic" "tf-demo-topic" {
   kafka_cluster {
     id = confluent_kafka_cluster.bsnir-tf-standard-cluster.id
   }
-  topic_name         = "automated_topic_v3"
+  topic_name         = "automated_topic"
   partitions_count   = 2
   rest_endpoint      = confluent_kafka_cluster.bsnir-tf-standard-cluster.rest_endpoint
   credentials {
@@ -155,28 +186,3 @@ resource "confluent_kafka_topic" "tf-demo-topic" {
   }
 }
 
-#----------------------------------------------------------------
-# Acls
-#----------------------------------------------------------------
-
-resource "confluent_kafka_acl" "bsnir-tf-standard-cluster-read-tf-topic" {
-  kafka_cluster {
-    id = confluent_kafka_cluster.bsnir-tf-standard-cluster.id
-  }
-  resource_type = "TOPIC"
-  resource_name = confluent_kafka_topic.tf-demo-topic.topic_name
-  pattern_type  = "LITERAL"
-  principal     = "User:${confluent_service_account.tf-demo-read-topic.id}"
-  host          = "*"
-  operation     = "READ"
-  permission    = "ALLOW"
-  rest_endpoint = confluent_kafka_cluster.bsnir-tf-standard-cluster.rest_endpoint
-  credentials {
-    key    = confluent_api_key.cluster-manage-topics-api-key.id
-    secret = confluent_api_key.cluster-manage-topics-api-key.secret
-  }
-  # In production - set to true
-  lifecycle {
-    prevent_destroy = false
-  }
-}
