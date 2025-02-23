@@ -8,6 +8,8 @@ Simple project for demonstrating JMX agent installation in a Kafka client.
 
 ## Run
 1. ```Docker compose up --build```
+2. Add prometheus Datasource
+3. Import dashboard.json to 
 
 ## Stay tuned
 1. Confluent JMX exporter metrics rules for Kafka clients:
