@@ -1,0 +1,17 @@
+# Use official Python 3 image
+FROM python:3.11
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the requirements file first to leverage Docker's caching mechanism
+COPY ./python_producer_librdkafka/requirements.txt .
+
+# Install dependencies
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Copy the producer script into the container
+COPY ./python_producer_librdkafka/producer_asyncio.py .
+
+# Set the entry point to run the producer
+ENTRYPOINT ["python3", "producer_asyncio.py"]
