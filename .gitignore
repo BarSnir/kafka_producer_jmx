@@ -27,3 +27,4 @@ hs_err_pid*
 replay_pid*
 .env
 /kafka_producer_jmx/target/*
+terraform.tfstate.*

@@ -22,4 +22,5 @@ https://github.com/confluentinc/jmx-monitoring-stacks/blob/main/shared-assets/jm
 
 ## Tears down
 1. Docker compose down
-2. terraform 
+2. cd terraform
+3. terraform destroy -> yes 
