@@ -12,6 +12,19 @@ services:
     ports:
       - "8080:8080"
       - "9091:9091"
+  
+  kafka-producer-python:
+    build:
+      context: .
+      dockerfile: .dockerfile-python-client
+    container_name: kafka-producer-python
+    env_file: ".env"
+    networks:
+      - monitoring
+    ports:
+      - "9094:9094"
+    volumes:
+      - ./python_producer_librdkafka:/app
 
   prometheus:
     image: prom/prometheus:v2.35.0

@@ -1,12 +1,12 @@
-import asyncio
+import asyncio, os
 from concurrent.futures import ThreadPoolExecutor
 from confluent_kafka import Producer
 from datetime import datetime
 import string, random, json
 
 NUM_OF_RECORDS = 10000
-RECORD_WEIGHT_MEGABYTES = 3
-TOPIC = "quotas_demo_topic_v3"
+RECORD_WEIGHT_MEGABYTES = 0.01
+TOPIC = ''
 producer = ''
 
 # Function to produce messages (runs synchronously)
@@ -93,8 +93,14 @@ def get_timestamp():
 
 # Run the async event loop
 if __name__ == '__main__':
-    config = read_config()
+    config = {}
+    config['bootstrap.servers'] = os.getenv('BOOTSTRAP_SERVERS')
+    config['security.protocol'] = 'SASL_SSL'
+    config['sasl.mechanism'] = 'PLAIN'
+    config['sasl.username'] = os.getenv('PYTHON_API_KEY')
+    config['sasl.password'] = os.getenv('PYTHON_API_SECRET')
     config['stats_cb'] = stats_cb
     config['statistics.interval.ms'] = int(30000)
+    TOPIC = os.getenv('TOPIC')
     producer = Producer(config)
     asyncio.run(main())
